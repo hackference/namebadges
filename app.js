@@ -96,7 +96,7 @@ App.get('/namebadge/:id', (req, res) => {
                     // const companyName = `l_text:Arial_35_bold:${encodeURIComponent(company)},co_rgb:FFFFFF,y_100`
                     const cacheBuster = `g_north_west,w_${bWidth*shrinkRatio*0.8},c_fit,l_text:Arial_10_bold:Preview%20${(new Date()).getTime()},co_rgb:FFFFFF,y_20`
                     const nameBadge = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${background}/${attendeeImage}/${attendeeName}/${hackferenceLogo}/${cloudinaryWatermark}/${cacheBuster}/hackference-2018/hackference-flag.png`;
-                    if(!result || !result.length) {
+                    if(!result) {
                         const gravatarProfileUrl = Gravatar.profile_url(email, { protocol: 'https' });
                         let gravatarUrl = ''
                         Axios.head(gravatarProfileUrl)
@@ -108,7 +108,7 @@ App.get('/namebadge/:id', (req, res) => {
                             })
                             .then(() => {
                                 return new Promise((resolve, reject) => {
-                                    Cloudinary.v2.uploader.upload(gravatarUrl, { public_id: cloudinaryPublicId },
+                                    Cloudinary.v2.uploader.upload(gravatarUrl, { public_id: cloudinaryPublicId, invalidate: true, overwrite: true, discard_original_filename: true },
                                     (error, result) => { 
                                         if (error) reject(error)
                                         resolve(result);
@@ -133,7 +133,7 @@ App.get('/namebadge/:id', (req, res) => {
 });
 App.post('/namebadge/:id', (req, res) => {
     const { id } = req.params;
-
+    
     Knex.select('ticket')
         .from('tickets')
         .where({
@@ -145,7 +145,7 @@ App.post('/namebadge/:id', (req, res) => {
             } else {
                 const { ticket } = result.pop();
                 const cloudinaryPublicId = `hackference-2018-namebadges/${ticket.toLowerCase()}`;
-                Cloudinary.v2.uploader.upload(req.files.image.path, { public_id: cloudinaryPublicId },
+                Cloudinary.v2.uploader.upload(req.files.image.path, { public_id: cloudinaryPublicId, invalidate: true, overwrite: true, discard_original_filename: true },
                     (error, result) => {
                         if (error) {
                             logger.error(error);
