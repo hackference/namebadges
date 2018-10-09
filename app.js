@@ -9,6 +9,13 @@ const Axios = require('axios');
 const Md5 = require('md5');
 const Formidable = require('express-formidable');
 
+// Configure Cloudinary
+Cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_KEY,
+    api_secret: process.env.CLOUDINARY_SECRET
+});
+
 // Configure logger
 const logger = {
     info: Debug('namebadge:info'),
@@ -33,6 +40,11 @@ App.get('/', (req, res) => {
 App.post('/', (req, res) => {
     const { ticket, email } = req.body;
 
+    logger.info({
+        ticket,
+        email,
+    })
+
     Knex.select('id')
         .from('tickets')
         .where({
@@ -40,6 +52,7 @@ App.post('/', (req, res) => {
             email,
         })
         .then(result => {
+            logger.info(result)
             if (result.length) {
                 const { id } = result.pop();
                 res.redirect(`/namebadge/${id}`);
@@ -65,15 +78,10 @@ App.get('/namebadge/:id', (req, res) => {
             id
         })
         .then(result => {
-            if (!result.length) {
+            if (!result || !result.length) {
                 res.status(404).send('Not found');
             } else {
                 const { ticket, email, fullname, company } = result.pop();
-                Cloudinary.config({
-                    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-                    api_key: process.env.CLOUDINARY_KEY,
-                    api_secret: process.env.CLOUDINARY_SECRET
-                });
                 const cloudinaryPublicId = `hackference-2018-namebadges/${ticket.toLowerCase()}`
                 Cloudinary.v2.api.resource(cloudinaryPublicId, (error, result) => {
                     const bWidth = 1050;
@@ -133,11 +141,6 @@ App.post('/namebadge/:id', (req, res) => {
                 res.status(404).send('Not found');
             } else {
                 const { ticket } = result.pop();
-                Cloudinary.config({
-                    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-                    api_key: process.env.CLOUDINARY_KEY,
-                    api_secret: process.env.CLOUDINARY_SECRET
-                });
                 const cloudinaryPublicId = `hackference-2018-namebadges/${ticket.toLowerCase()}`;
                 Cloudinary.v2.uploader.upload(req.files.image.path, { public_id: cloudinaryPublicId },
                     (error, result) => {
