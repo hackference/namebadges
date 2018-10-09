@@ -7,7 +7,6 @@ const Cloudinary = require('cloudinary');
 const Gravatar = require('gravatar');
 const Axios = require('axios');
 const Md5 = require('md5');
-const Busboy = require('busboy');
 const Formidable = require('express-formidable');
 
 // Configure logger
