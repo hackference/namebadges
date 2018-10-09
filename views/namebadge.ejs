@@ -5,15 +5,21 @@
     </div>
 </div>
 <div class="row">
-    <form class="col s3">
+    <form class="col s3" method="post" action="/namebadge/<%= id %>" enctype="multipart/form-data">
+        <p>To change your picture on your name badge do so here.</p>
         <div class="file-field input-field">
             <div class="btn">
                 <span>Image</span>
-                <input type="file">
+                <input type="file" name="image" id="image" required>
             </div>
             <div class="file-path-wrapper">
                 <input class="file-path validate" type="text">
             </div>
+        </div>
+        <div class="row">
+            <button class="btn waves-effect waves-light" type="submit">Upload image
+                <i class="material-icons right">send</i>
+            </button>
         </div>
     </form>
     <img id="namebadge" data-cloudinary-path="<%= nameBadge %>" class="col s9" src="<%= nameBadge %>" />

@@ -24,6 +24,7 @@
     "dotenv": "^6.0.0",
     "ejs": "^2.6.1",
     "express": "^4.16.3",
+    "express-formidable": "^1.0.0",
     "gravatar": "^1.6.0",
     "knex": "^0.15.2",
     "md5": "^2.2.1",
