@@ -145,8 +145,21 @@ App.post('/namebadge/:id', (req, res) => {
                             logger.error(error);
                             res.status(500).send('Internal Server Error')
                         } else {
-                            logger.info(result);
-                            res.redirect(`/namebadge/${id}`);
+                            Knex('tickets')
+                                .where({
+                                    id
+                                })
+                                .update({
+                                    uploaded: new Date(),
+                                })
+                                .then(() => {
+                                    logger.info(result);
+                                    res.redirect(`/namebadge/${id}`);
+                                })
+                                .catch(error => {
+                                    logger.error(error);
+                                    res.redirect(`/namebadge/${id}`);
+                                })
                         }
                     });
             }
