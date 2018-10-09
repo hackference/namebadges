@@ -21,6 +21,10 @@
                 <i class="material-icons right">send</i>
             </button>
         </div>
+        <% if (preview) { %>
+        <p>As the cache on the images is strict, this is to show the image that appears if the cache isn't bust.</p>
+        <img src="<%= preview %>" />
+        <% }  %>
     </form>
     <img id="namebadge" data-cloudinary-path="<%= nameBadge %>" class="col s9" src="<%= nameBadge %>" />
 </div>

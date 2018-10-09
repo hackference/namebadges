@@ -84,6 +84,7 @@ App.get('/namebadge/:id', (req, res) => {
                 const { ticket, email, fullname, company } = result.pop();
                 const cloudinaryPublicId = `hackference-2018-namebadges/${ticket.toLowerCase()}`
                 Cloudinary.v2.api.resource(cloudinaryPublicId, (error, result) => {
+                    let preview = ''
                     const bWidth = 1050;
                     const bHeight = 1480;
                     const shrinkRatio = 0.54;
@@ -93,9 +94,10 @@ App.get('/namebadge/:id', (req, res) => {
                     const hackferenceLogo = `l_hackference-white_tybqah,w_${Math.floor(bWidth * shrinkRatio * 0.9)},y_250`;
                     const cloudinaryWatermark = `g_south,l_cloudinary_logo,o_50,y_20,w_${Math.floor(bWidth * shrinkRatio * 0.50)}`;
                     // const companyName = `l_text:Arial_35_bold:${encodeURIComponent(company)},co_rgb:FFFFFF,y_100`
-                    const cacheBuster = `g_north_west,w_10,c_fit,l_text:Arial_50_bold:${(new Date()).getTime()},co_rgb:FFFFFF,y_20`
+                    const cacheBuster = `g_north_west,w_${bWidth*shrinkRatio*0.8},c_fit,l_text:Arial_10_bold:Preview%20${(new Date()).getTime()},co_rgb:FFFFFF,y_20`
                     const nameBadge = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${background}/${attendeeImage}/${attendeeName}/${hackferenceLogo}/${cloudinaryWatermark}/${cacheBuster}/hackference-2018/hackference-flag.png`;
                     if(!result || !result.length) {
+                        preview = result.url;
                         const gravatarProfileUrl = Gravatar.profile_url(email, { protocol: 'https' });
                         let gravatarUrl = ''
                         Axios.head(gravatarProfileUrl)
@@ -115,14 +117,14 @@ App.get('/namebadge/:id', (req, res) => {
                                 })
                             })
                             .then(() => {
-                                res.render('namebadge', { id, ticket, email, fullname, company, nameBadge })
+                                res.render('namebadge', { id, ticket, email, fullname, company, nameBadge, preview })
                             })
                             .catch(error => {
                                 logger.error(error);
                                 // res.status(500).send('Internal Server Error')
                             })
                     } else {
-                        res.render('namebadge', { id, ticket, email, fullname, company, nameBadge })
+                        res.render('namebadge', { id, ticket, email, fullname, company, nameBadge, preview })
                     }
                 });
             }
