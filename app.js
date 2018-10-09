@@ -97,7 +97,6 @@ App.get('/namebadge/:id', (req, res) => {
                     const cacheBuster = `g_north_west,w_${bWidth*shrinkRatio*0.8},c_fit,l_text:Arial_10_bold:Preview%20${(new Date()).getTime()},co_rgb:FFFFFF,y_20`
                     const nameBadge = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${background}/${attendeeImage}/${attendeeName}/${hackferenceLogo}/${cloudinaryWatermark}/${cacheBuster}/hackference-2018/hackference-flag.png`;
                     if(!result || !result.length) {
-                        preview = result.url;
                         const gravatarProfileUrl = Gravatar.profile_url(email, { protocol: 'https' });
                         let gravatarUrl = ''
                         Axios.head(gravatarProfileUrl)
@@ -116,7 +115,8 @@ App.get('/namebadge/:id', (req, res) => {
                                      });
                                 })
                             })
-                            .then(() => {
+                            .then((result) => {
+                                preview = result.url;
                                 res.render('namebadge', { id, ticket, email, fullname, company, nameBadge, preview })
                             })
                             .catch(error => {
@@ -124,6 +124,7 @@ App.get('/namebadge/:id', (req, res) => {
                                 // res.status(500).send('Internal Server Error')
                             })
                     } else {
+                        preview = result.url;
                         res.render('namebadge', { id, ticket, email, fullname, company, nameBadge, preview })
                     }
                 });
