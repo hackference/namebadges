@@ -95,7 +95,7 @@ App.get('/namebadge/:id', (req, res) => {
                     // const companyName = `l_text:Arial_35_bold:${encodeURIComponent(company)},co_rgb:FFFFFF,y_100`
                     const cacheBuster = `g_north_west,w_10,c_fit,l_text:Arial_50_bold:${(new Date()).getTime()},co_rgb:FFFFFF,y_20`
                     const nameBadge = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${background}/${attendeeImage}/${attendeeName}/${hackferenceLogo}/${cloudinaryWatermark}/${cacheBuster}/hackference-2018/hackference-flag.png`;
-                    if(!result.length) {
+                    if(!result || !result.length) {
                         const gravatarProfileUrl = Gravatar.profile_url(email, { protocol: 'https' });
                         let gravatarUrl = ''
                         Axios.head(gravatarProfileUrl)
