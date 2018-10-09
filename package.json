@@ -1,0 +1,34 @@
+{
+  "name": "namebadges",
+  "version": "0.0.1",
+  "description": "An app to allow attendees to upload images for namebadges at Hackference",
+  "main": "app.js",
+  "scripts": {
+    "postinstall": "npx knex migrate:latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hackference/namebadges.git"
+  },
+  "author": "Mike Elsmore <mike@elsmore.me>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hackference/namebadges/issues"
+  },
+  "homepage": "https://github.com/hackference/namebadges#readme",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
+    "cloudinary": "^1.11.0",
+    "debug": "^4.0.1",
+    "dotenv": "^6.0.0",
+    "ejs": "^2.6.1",
+    "express": "^4.16.3",
+    "gravatar": "^1.6.0",
+    "knex": "^0.15.2",
+    "md5": "^2.2.1",
+    "pg": "^7.5.0",
+    "sqlite3": "^4.0.2",
+    "uuid": "^3.3.2"
+  }
+}

@@ -1,0 +1,56 @@
+<%- include('partial/header') -%>
+<div class="row" >
+    <div class="col s12">
+        <h1>Hackference Name Badge</h1>
+    </div>
+</div>
+<% if(warning) { %>
+<style>
+.icon_style{
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-size: 20px;
+    color: white;
+    cursor:pointer; 
+}
+</style>
+<div class="row" id="alert_box">
+    <div class="col s12 m12">
+        <div class="card red darken-1">
+            <div class="row">
+                <div class="col s12 m10">
+                    <div class="card-content white-text">
+                        <p><%= warning %></p>
+                    </div>
+                </div>
+                <div class="col s12 m2">
+                    <i class="material-icons right icon_style" id="alert_close">close</i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<% } %>
+<div class="row">
+    <form class="col s12" method="post" actions="/">
+        <div class="row">
+            <div class="input-field col s12">
+                <input id="ticket" type="text" required name="ticket" class="validate" value="<%= ticket %>" >
+                <label for="ticket">Ticket Reference</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s12">
+                <input id="email" type="email" required name="email" class="validate" value="<%= email %>">
+                <label for="email">Ticket Email</label>
+            </div>
+        </div>
+        <div class="row">
+            <button class="btn waves-effect waves-light" type="submit" >Find Name Badge
+                <i class="material-icons right">send</i>
+            </button>
+        </div>
+    </form>
+</div>
+<%- include('partial/footer') -%>
