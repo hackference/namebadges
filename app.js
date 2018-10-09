@@ -115,7 +115,7 @@ App.get('/namebadge/:id', (req, res) => {
                                 })
                             })
                             .then(() => {
-                                res.render('namebadge', { ticket, email, fullname, company, nameBadge })
+                                res.render('namebadge', { id, ticket, email, fullname, company, nameBadge })
                             })
                             .catch(error => {
                                 logger.error(error);
