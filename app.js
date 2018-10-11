@@ -2,7 +2,6 @@ require('dotenv').load({ silent: true });
 const Express = require('express');
 const BodyParser = require('body-parser');
 const Debug = require('debug');
-const Knex = require('knex')(require('./knexfile')[process.env.NODE_ENV]);
 const Cloudinary = require('cloudinary');
 const Gravatar = require('gravatar');
 const Axios = require('axios');
@@ -45,6 +44,7 @@ App.post('/', (req, res) => {
         email,
     })
 
+    const Knex = require('knex')(require('./knexfile')[process.env.NODE_ENV]);
     Knex.select('id')
         .from('tickets')
         .where({
@@ -64,6 +64,9 @@ App.post('/', (req, res) => {
                 })
             }
         })
+        .then(() => {
+            Knex.destroy();
+        })
         .catch(error => {
             logger.error(error);
             res.status(500).send('Internal Server Error');
@@ -72,6 +75,7 @@ App.post('/', (req, res) => {
 App.get('/namebadge/:id', (req, res) => {
     const { id } = req.params;
 
+    const Knex = require('knex')(require('./knexfile')[process.env.NODE_ENV]);
     Knex.select('ticket', 'email', 'fullname', 'company')
         .from('tickets')
         .where({
@@ -85,16 +89,16 @@ App.get('/namebadge/:id', (req, res) => {
                 const cloudinaryPublicId = `hackference-2018-namebadges/${ticket.toLowerCase()}`
                 Cloudinary.v2.api.resource(cloudinaryPublicId, (error, result) => {
                     let preview = ''
-                    const bWidth = 1050;
-                    const bHeight = 1480;
+                    const bWidth = 1240;
+                    const bHeight = 1748;
                     const shrinkRatio = 0.54;
-                    const background = `b_rgb:52c3ef,c_crop,e_colorize:100,h_${bHeight},o_10,w_${bWidth}/c_crop,e_grayscale,h_${bHeight},l_hackference-2018:hackference-flag,o_10,w_${bWidth}/c_scale,w_${bWidth * shrinkRatio}`;
-                    const attendeeImage = `l_hackference-2018-namebadges:${ticket.toLowerCase()},r_10,w_170,y_-150,bo_2px_solid_white`;
+                    const background = `b_rgb:52c3ef,c_crop,e_colorize:100,h_${bHeight},o_10,w_${bWidth}/c_crop,e_grayscale,h_${bHeight},l_hackference-2018:hackference-flag,o_10,w_${Math.floor(bWidth)}/c_scale,w_${Math.floor(bWidth * shrinkRatio)}`;
+                    const attendeeImage = `l_hackference-2018-namebadges:${ticket.toLowerCase()},r_10,w_${Math.floor(bWidth * shrinkRatio * 0.3)},y_-${Math.floor(bHeight * shrinkRatio * 0.2)},bo_2px_solid_white`;
                     const attendeeName = `w_${Math.floor(bWidth * shrinkRatio * 0.9)},c_fit,l_text:Arial_50_bold:${encodeURIComponent(fullname)},co_rgb:FFFFFF,y_20`
-                    const hackferenceLogo = `l_hackference-white_tybqah,w_${Math.floor(bWidth * shrinkRatio * 0.9)},y_250`;
+                    const hackferenceLogo = `l_hackference-white_tybqah,w_${Math.floor(bWidth * shrinkRatio * 0.9)},y_${Math.floor(bHeight * shrinkRatio * 0.25)}`;
                     const cloudinaryWatermark = `g_south,l_cloudinary_logo,o_50,y_20,w_${Math.floor(bWidth * shrinkRatio * 0.50)}`;
                     // const companyName = `l_text:Arial_35_bold:${encodeURIComponent(company)},co_rgb:FFFFFF,y_100`
-                    const cacheBuster = `g_north_west,w_${bWidth*shrinkRatio*0.8},c_fit,l_text:Arial_10_bold:Preview%20${(new Date()).getTime()},co_rgb:FFFFFF,y_20`
+                    const cacheBuster = `g_north_west,w_${Math.floor(bWidth * shrinkRatio * 0.8)},c_fit,l_text:Arial_10_bold:Preview%20${(new Date()).getTime()},co_rgb:FFFFFF,y_20`
                     const nameBadge = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${background}/${attendeeImage}/${attendeeName}/${hackferenceLogo}/${cloudinaryWatermark}/${cacheBuster}/hackference-2018/hackference-flag.png`;
                     if(!result) {
                         const gravatarProfileUrl = Gravatar.profile_url(email, { protocol: 'https' });
@@ -130,10 +134,18 @@ App.get('/namebadge/:id', (req, res) => {
                 });
             }
         })
+        .then(() => {
+            Knex.destroy();
+        })
+        .catch(error => {
+            logger.error(error);
+            res.status(500).send('Internal Server Error');
+        })
 });
 App.post('/namebadge/:id', (req, res) => {
     const { id } = req.params;
-    
+
+    const Knex = require('knex')(require('./knexfile')[process.env.NODE_ENV]);
     Knex.select('ticket')
         .from('tickets')
         .where({
@@ -142,33 +154,45 @@ App.post('/namebadge/:id', (req, res) => {
         .then(result => {
             if (!result.length) {
                 res.status(404).send('Not found');
+                return Promise.resolve();
             } else {
-                const { ticket } = result.pop();
-                const cloudinaryPublicId = `hackference-2018-namebadges/${ticket.toLowerCase()}`;
-                Cloudinary.v2.uploader.upload(req.files.image.path, { public_id: cloudinaryPublicId, invalidate: true, overwrite: true, discard_original_filename: true },
-                    (error, result) => {
-                        if (error) {
-                            logger.error(error);
-                            res.status(500).send('Internal Server Error')
-                        } else {
-                            Knex('tickets')
-                                .where({
-                                    id
-                                })
-                                .update({
-                                    uploaded: new Date(),
-                                })
-                                .then(() => {
-                                    logger.info(result);
-                                    res.redirect(`/namebadge/${id}`);
-                                })
-                                .catch(error => {
-                                    logger.error(error);
-                                    res.redirect(`/namebadge/${id}`);
-                                })
-                        }
-                    });
+                return new Promise((resolve, reject) => {
+                    const { ticket } = result.pop();
+                    const cloudinaryPublicId = `hackference-2018-namebadges/${ticket.toLowerCase()}`;
+                    Cloudinary.v2.uploader.upload(req.files.image.path, { public_id: cloudinaryPublicId, invalidate: true, overwrite: true, discard_original_filename: true },
+                        (error, result) => {
+                            if (error) {
+                                logger.error(error);
+                                res.status(500).send('Internal Server Error')
+                            } else {
+                                Knex('tickets')
+                                    .where({
+                                        id
+                                    })
+                                    .update({
+                                        uploaded: new Date(),
+                                    })
+                                    .then(() => {
+                                        logger.info(result);
+                                        res.redirect(`/namebadge/${id}`);
+                                        resolve();
+                                    })
+                                    .catch(error => {
+                                        logger.error(error);
+                                        res.redirect(`/namebadge/${id}`);
+                                        reject();
+                                    })
+                            }
+                        });
+                });
             }
+        })
+        .then(() => {
+            Knex.destroy();
+        })
+        .catch(error => {
+            logger.error(error);
+            res.status(500).send('Internal Server Error');
         })
 });
 
